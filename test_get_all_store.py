@@ -9,7 +9,7 @@ def test_get_all_store():
     # 1. Получение списка магазинов
     resp = s.get(settings.BASE_URL + '/api/store')
     response_data = resp.json()
-    # Ответ не' пустой'
+    # Ответ не ' пустой'
     assert response_data is not None, 'Ответ пустой'
     # Соответствует моделе
     validated_stores = StoresRes(**response_data)
@@ -19,6 +19,6 @@ def test_get_all_store():
     # 2. Не валидный токен
     s.headers['Authorization'] = 'fakeToken'
     negative_resp = s.get(settings.BASE_URL + '/api/store')
-    assert negative_resp.status_code >= 400, 'Невалидный токен, не вызвал ошибку'
+    assert negative_resp.status_code >= 400, 'Невалидный токен не вызвал ошибку'
 
     s.close()
