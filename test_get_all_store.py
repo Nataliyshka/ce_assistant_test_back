@@ -8,6 +8,7 @@ def test_get_all_store():
     s = get_session_by_role(RoleUser.ADMIN)
     # 1. Получение списка магазинов
     resp = s.get(settings.BASE_URL + '/api/store')
+    assert resp.status_code >= 200 and resp.status_code < 400
     response_data = resp.json()
     # Ответ не ' пустой'
     assert response_data is not None, 'Ответ пустой'
