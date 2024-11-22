@@ -14,3 +14,5 @@ def test_post_cart():
     # Соответствует моделе
     validated_cart = CartRes(**response_data)
 
+
+    s.close()

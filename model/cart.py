@@ -11,12 +11,18 @@ class BonusProgram(BaseModel):
     name: str
     value: float
 
+
+class CardType(Enum):
+    GOLD = 'Золотая'
+    SILVER = 'Железная'
+    TREE = 'Деревянная'
+
 class Customer(BaseModel):
     name: str
     guid: str
-    phone: str
+    phone: str = Field(min_length=10)
     is_card_holder: bool = Field(..., alias="isCardholder")
-    cart_type: str = Field(..., alias="cardType")
+    cart_type: CardType | None = Field(..., alias="cardType")
     total_balance_bonuses: float = Field(..., alias="totalBalanceBonuses")
     total_availible_bonuses: float = Field(..., alias="totalAvailableBonuses")
     bonus_balance: list[BonusProgram] = Field(..., alias="bonusBalance")
