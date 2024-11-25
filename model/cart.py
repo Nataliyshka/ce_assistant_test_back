@@ -17,6 +17,11 @@ class CardType(Enum):
     SILVER = 'Железная'
     TREE = 'Деревянная'
 
+
+class CountItemsReq(BaseModel):
+    count: float
+    
+
 class Customer(BaseModel):
     name: str
     guid: str
@@ -30,19 +35,19 @@ class Customer(BaseModel):
 
 
 class Item(BaseModel):
-    guid: str
+    guid: str = Field(min_length=36)
     title: str
     code: str
     count: float
     sum: float
-    discount_sum: float
-    max_count: float
-    total_accrual_bonuses: float
-    accrual_bonuses: list[BonusProgram]
-    total_availible_bonuses: float
-    availible_bonuses: list[BonusProgram]
-    total_applied_bonuses: float
-    applied_bonuses: list[BonusProgram]
+    discount_sum: float = Field(..., alias='discountSum')
+    max_count: float = Field(..., alias='maxCount')
+    total_accrual_bonuses: float = Field(..., alias='totalAccrualBonuses')
+    accrual_bonuses: list[BonusProgram] = Field(..., alias='accrualBonuses')
+    total_availible_bonuses: float | None = Field(..., alias='totalAvailableBonuses')
+    availible_bonuses: list[BonusProgram] | None = Field(..., alias='availableBonuses')
+    total_applied_bonuses: float = Field(..., alias='totalAppliedBonuses')
+    applied_bonuses: list[BonusProgram] = Field(...,alias='appliedBonuses')
 
 
 class CartStatus(Enum):
