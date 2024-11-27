@@ -78,3 +78,8 @@ class Cart(BaseModel):
 
 class CartRes(BaseModel):
     cart: Cart
+
+
+class OrderRes(BaseModel):
+    order: str
+
