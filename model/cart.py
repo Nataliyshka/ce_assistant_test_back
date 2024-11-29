@@ -27,7 +27,7 @@ class Customer(BaseModel):
     guid: str
     phone: str = Field(min_length=10)
     is_card_holder: bool = Field(..., alias="isCardholder")
-    cart_type: CardType | None = Field(..., alias="cardType")
+    card_type: CardType | None = Field(..., alias="cardType")
     total_balance_bonuses: float = Field(..., alias="totalBalanceBonuses")
     total_availible_bonuses: float = Field(..., alias="totalAvailableBonuses")
     bonus_balance: list[BonusProgram] = Field(..., alias="bonusBalance")

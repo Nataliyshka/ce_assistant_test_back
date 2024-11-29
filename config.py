@@ -10,6 +10,16 @@ class Settings(BaseSettings):
     SIMPLE_PASSWORD: str
     FAIL_LOGIN: str
     FAIL_PASSWORD: str
+    STORE_ABAKAN: str
+    STORE_ZHELEZNOGORSK: str
+    STORE_MINYSINSK: str
+    ITEM_BLENDER: str
+    ITEM_TEAPOT: str
+    ITEM_SMARTPHONE: str
+    CUSTOMER_GOLD: str
+    CUSTOMER_SILVER: str
+    CUSTOMER_THREE: str
+
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 

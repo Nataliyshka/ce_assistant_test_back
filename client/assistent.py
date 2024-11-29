@@ -92,7 +92,7 @@ class AssistantClient:
 
 
     def cart_apply_bonuses(self, cart: str, bonuses: float) -> Cart:
-        resp = self.__session.post(self.__base_url + '/api/cart/' + cart + '/apply-bonuses/' + bonuses)
+        resp = self.__session.post(self.__base_url + '/api/cart/' + cart + '/apply-bonuses/' + str(bonuses))
         assert check_status_code(resp.status_code), 'status code is not positive'
         validated_resp = CartRes(**resp.json())
         return validated_resp.cart
@@ -159,3 +159,6 @@ class AssistantClient:
         assert check_status_code(resp.status_code), 'status code is not positive'
         validated_resp = PaymentInfoRes(**resp.json())
         return validated_resp.payment_info
+
+    def close_session(self) -> None:
+        self.__session.close()
