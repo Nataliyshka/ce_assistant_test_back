@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     CUSTOMER_GOLD: str
     CUSTOMER_SILVER: str
     CUSTOMER_THREE: str
+    BASE_ONEC_URL: str
 
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')

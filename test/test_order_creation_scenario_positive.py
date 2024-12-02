@@ -1,8 +1,8 @@
 import math
-from random import randint, uniform
-from client.assistent import AssistantClient
-from model.cart import BonusProgram, CardType, Cart, CartStatus, Customer, Item
-from session import RoleUser
+from random import randint
+from client.assistent.client import AssistantClient
+from client.assistent.enum import RoleUser
+from client.assistent.model.cart import CardType, Cart, CartStatus, Item
 from config import settings
 
 

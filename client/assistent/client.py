@@ -1,23 +1,13 @@
-from enum import Enum
 import requests
-from client.utils import check_status_code
 from config import settings
-from model.auth import AuthRequest, AuthResponse, AuthUser
-from model.cart import Cart, CartRes, CountItemsReq, OrderRes, PostCartStoreParams
-from model.payment import PaymentInfo, PaymentInfoRes, PaymentQrCode
-from model.store import Coordinates, Store, StoreRes, StoresRes
-from model.item import GetItemParams, Item, ItemRes, ItemsRes
-from session import RoleUser
+from client.assistent.enum import RoleUser
+from client.assistent.model.auth import AuthRequest, AuthResponse
+from client.utils import check_status_code
+from client.assistent.model.cart import Cart, CartRes, CountItemsReq, OrderRes, PostCartStoreParams
+from client.assistent.model.payment import PaymentInfo, PaymentInfoRes, PaymentQrCode
+from client.assistent.model.store import Coordinates, Store, StoreRes, StoresRes
+from client.assistent.model.item import GetItemParams, Item, ItemRes, ItemsRes
 
-admin_user = AuthUser(username=settings.ADMIN_LOGIN, password=settings.ADMIN_PASSWORD)
-simple_user = AuthUser(username=settings.SIMPLE_LOGIN, password=settings.SIMPLE_PASSWORD)
-error_user = AuthUser(username=settings.FAIL_LOGIN, password=settings.FAIL_PASSWORD)
-
-
-class RoleUser(Enum):
-    ADMIN = admin_user
-    SIMPLE = simple_user
-    ERROR = error_user
 
 
 class AssistantClient:
