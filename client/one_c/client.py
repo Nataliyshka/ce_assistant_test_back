@@ -1,6 +1,7 @@
+from pydantic import TypeAdapter
 import requests
-from client.one_c.model.order import OrderRes
-from client.one_c.model.product import ProductStock
+from client.one_c.model.order import Order
+from client.one_c.model.product import Product
 from config import settings
 from enum import Enum
 from client.one_c.enum import RoleUser
@@ -14,16 +15,20 @@ class OneCClient:
 
     def __get_authed_session(self, role: RoleUser) -> requests.Session:
         session = requests.Session()
-        session.auth = (role.value.username, role.value.password)
+        session.auth = (role.value.username.encode("utf-8"), role.value.password.encode("utf-8"))
 
         return session
     
 
-    def oreder_get_by_cart(self, uuid: str) -> OrderRes:
-        resp = self.__session.get(self.__base_url + '/exchange-assistant/V1/order/byCart/' + uuid)
+    def order_get_by_cart(self, uuid: str) -> Order:
+        resp = self.__session.get(self.__base_url + '/exchange-assistant/v1/order/byCart/' + uuid)
         assert check_status_code(resp.status_code), 'status code is not positive'
-        validate_resp = OrderRes(**resp.json())
+        validate_resp = Order(**resp.json())
         return validate_resp
     
-    def products_on_store(self, store: str) -> list[ProductStock]:
-        resp = self.__session.get
+    
+    def product_on_store(self, guid: str) -> list[Product]:
+        resp = self.__session.get(self.__base_url + '/ExchangeSite/store/' + guid + '/products')
+        type_adapter = TypeAdapter(list[Product])
+        validate_resp = type_adapter.validate_python(resp.json())
+        return validate_resp

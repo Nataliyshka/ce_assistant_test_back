@@ -1,5 +1,5 @@
 
-from client.assistent.client import AssistantClient
+#from client.assistent.client import AssistantClient
 
 
 # def test_create_cart_by_store():

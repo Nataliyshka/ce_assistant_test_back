@@ -1,5 +1,5 @@
 from enum import Enum
-from client.one_c.model import AuthUser
+from client.one_c.model.auth import AuthUser
 from config import settings
 
 

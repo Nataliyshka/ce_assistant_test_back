@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     CUSTOMER_SILVER: str
     CUSTOMER_THREE: str
     BASE_ONEC_URL: str
-
+    NULL_ITEM: str
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
