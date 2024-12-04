@@ -95,6 +95,8 @@ def test_create_cart_positive():
 
     finally:
         client_assistant.close_session()
+        client_onec.close_session()
+
 
 
 def get_item_from_cart(itemGuid: str, cart: Cart) -> Item | None:

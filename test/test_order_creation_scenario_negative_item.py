@@ -108,3 +108,4 @@ def test_create_order_negative_item():
 
     finally:
         client_assistant.close_session()
+        client_onec.close_session()

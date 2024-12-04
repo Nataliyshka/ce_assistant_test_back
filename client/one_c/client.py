@@ -32,3 +32,6 @@ class OneCClient:
         type_adapter = TypeAdapter(list[Product])
         validate_resp = type_adapter.validate_python(resp.json())
         return validate_resp
+    
+    def close_session(self) -> None:
+        self.__session.close()
