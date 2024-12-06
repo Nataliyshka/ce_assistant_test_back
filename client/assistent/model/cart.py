@@ -23,7 +23,7 @@ class CountItemsReq(BaseModel):
     
 
 class Customer(BaseModel):
-    name: str
+    name: str | None
     guid: str
     phone: str = Field(min_length=10)
     is_card_holder: bool = Field(..., alias="isCardholder")

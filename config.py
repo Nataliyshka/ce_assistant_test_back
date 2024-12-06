@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     CUSTOMER_GOLD: str
     CUSTOMER_SILVER: str
     CUSTOMER_THREE: str
-    UNAUTHORIZED_CUSTOMER: str
+    CUSTOMER_UNAUTHORIZED: str
     BASE_ONEC_URL: str
     NULL_ITEM: str
 

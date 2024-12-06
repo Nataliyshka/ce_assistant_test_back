@@ -9,6 +9,8 @@ from client.utils import check_status_code
 
 
 class OneCClient:
+    """Клиент для работы с 1С
+    """    
     def __init__(self, role: RoleUser) -> None:
         self.__session = self.__get_authed_session(role)
         self.__base_url: str = settings.BASE_ONEC_URL
@@ -21,6 +23,17 @@ class OneCClient:
     
 
     def order_get_by_cart(self, uuid: str) -> Order:
+        """Получение заказа по uuid корзины.
+
+        Args:
+            uuid (`str`): UUID корзины.
+
+        Returns:
+            `Order`: Объект заказа из 1С.
+
+        Raises:
+            `AssertionError`: Если код ответа от сервера не является успешным.
+        """
         resp = self.__session.get(self.__base_url + '/exchange-assistant/v1/order/byCart/' + uuid)
         assert check_status_code(resp.status_code), 'status code is not positive'
         validate_resp = Order(**resp.json())
@@ -28,6 +41,17 @@ class OneCClient:
     
     
     def product_on_store(self, guid: str) -> list[Product]:
+        """Получение списка товаров на магазине.
+
+        Args:
+            guid (`str`): GUID магазина.
+
+        Returns:
+            list[`Product`]: Список товаров на магазине.
+
+        Raises:
+            `AssertionError`: Если код ответа от сервера не является успешным.
+        """
         resp = self.__session.get(self.__base_url + '/ExchangeSite/store/' + guid + '/products')
         type_adapter = TypeAdapter(list[Product])
         validate_resp = type_adapter.validate_python(resp.json())
