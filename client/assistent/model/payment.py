@@ -2,6 +2,9 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 
+class PaymentAuthQuery(BaseModel):
+    Authorization: str
+
 class PaymentQrCode(BaseModel):
     qr_code: str = Field(..., alias="qrCode")
     payment_url: str = Field(...,alias="paymentUrl")
@@ -35,9 +38,9 @@ class PaymentInfo(BaseModel):
     status: PaymentStatus
     total_amount: float = Field(...,alias="totalAmount")
     payment_url: str = Field(...,alias="paymentUrl")
-    refund: PaymentRefund
-    items: PaymentItems
+    refund: PaymentRefund | None
+    
 
 
 class PaymentInfoRes(BaseModel):
-    payment_info: PaymentInfo
+    payment_info: PaymentInfo = Field(...,alias="paymentInfo")

@@ -1,10 +1,11 @@
 import requests
+import json
 from config import settings
 from client.assistent.enum import RoleUser
 from client.assistent.model.auth import AuthRequest, AuthResponse
 from client.utils import check_status_code
 from client.assistent.model.cart import Cart, CartRes, CountItemsReq, OrderRes, PostCartStoreParams
-from client.assistent.model.payment import PaymentInfo, PaymentInfoRes, PaymentQrCode
+from client.assistent.model.payment import PaymentAuthQuery, PaymentInfo, PaymentInfoRes, PaymentQrCode
 from client.assistent.model.store import Coordinates, Store, StoreRes, StoresRes
 from client.assistent.model.item import GetItemParams, Item, ItemRes, ItemsRes
 
@@ -168,7 +169,7 @@ class AssistantClient:
             cart (`str`): UUID корзины.
         """
         resp = self.__session.patch(self.__base_url + '/api/cart/' + cart + '/close')
-        assert check_status_code(resp.status_code), 'status code is not positive'
+        assert check_status_code(resp.status_code), f'status code is not positive: {resp.text}'
         return 
     
 
@@ -278,24 +279,42 @@ class AssistantClient:
             `PaymentQrCode`: QR-код.
         """
         resp = self.__session.post(self.__base_url + '/api/cart/' + cart + '/pay/create')
-        assert check_status_code(resp.status_code), 'status code is not positive'
+        assert check_status_code(resp.status_code), f'status code is not positive: {resp.text}'
         validated_resp = PaymentQrCode(**resp.json())
         return validated_resp
     
 
     def cart_get_status_pay(self, cart: str) -> PaymentInfo:
-        """Получение статуса платежа.
+        """Получение финального статуса платежа через SSE.
 
         Args:
             cart (`str`): UUID корзины.
 
         Returns:
-            `PaymentInfo`: Статус платежа.
+            `PaymentInfo`: Финальный статус платежа.
         """
-        resp = self.__session.get(self.__base_url + '/api/cart/' + cart + '/pay/status')
+        params = PaymentAuthQuery(Authorization=self.__session.headers['Authorization'])
+        resp = self.__session.get(
+            self.__base_url + '/api/cart/' + cart + '/pay/status',
+            params=params,
+            stream=True,
+            headers={'Accept': 'text/event-stream'}
+        )
         assert check_status_code(resp.status_code), 'status code is not positive'
-        validated_resp = PaymentInfoRes(**resp.json())
-        return validated_resp.payment_info
+        
+        last_status = None
+        for line in resp.iter_lines():
+            if line:
+                data = line.decode('utf-8').replace('data: ', '')
+                try:
+                    event_data = json.loads(data)
+                    last_status = PaymentInfoRes(**event_data).payment_info
+                except json.JSONDecodeError:
+                    continue
+        
+        assert last_status is not None, 'last_status is None'
+
+        return last_status
 
     def close_session(self) -> None:
         self.__session.close()
