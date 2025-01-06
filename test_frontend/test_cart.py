@@ -1,9 +1,11 @@
-import time
 from playwright.sync_api import expect, Page
 from config import settings
 
 
 def test_cart(page_authed: Page):
+    # Ждём, пока body получит style="overflow: auto;" (прелоадер завершил работу)
+    page_authed.wait_for_selector("body[style*='overflow: auto']")
+    
     customer_phone = settings.CUSTOMER_GOLD
     page_authed.get_by_label("Телефон покупателя").fill("7" + customer_phone)
     page_authed.locator("button[class*='arrowBtn']").click()
@@ -25,3 +27,50 @@ def test_cart(page_authed: Page):
     card_type = page_authed.locator("div[class*='card_type']")
     expect(card_type).to_be_visible()
     expect(card_type.locator("p")).not_to_be_empty()
+
+    # Поиск товара
+    page_authed.wait_for_selector("body[style*='overflow: auto']")
+    page_authed.get_by_role("button", name="Поиск").click()
+    page_authed.get_by_placeholder("Поиск").fill("2000999699450")
+    page_authed.get_by_text("Штрихкод: 2000999699450").click()
+    page_authed.get_by_role("button", name="Выбрать").click()
+    page_authed.wait_for_selector("body[style*='overflow: hidden']")
+
+    # Добавляем ещё один товар
+    page_authed.wait_for_selector("body[style*='overflow: auto']")
+    page_authed.get_by_role("button", name="Поиск").click()
+    page_authed.get_by_placeholder("Поиск").fill("2008167281322")
+    page_authed.get_by_text("Штрихкод: 2008167281322").click()
+    page_authed.get_by_role("button", name="Выбрать").click()
+    page_authed.wait_for_selector("body[style*='overflow: hidden']")
+    page_authed.wait_for_selector("body[style*='overflow: auto']")
+
+    cart_items = page_authed.locator("div[class*='product_card']").all()
+    assert len(cart_items) == 2, "Неверное количество товаров в корзине"
+
+    # Изменяем количество товара у первого товара
+    page_authed.wait_for_selector("body[style*='overflow: auto']")
+    first_product = page_authed.locator("div[class*='product_card']").first
+    first_product.get_by_text("Пакет-майка ПНД \"Ценалом\" 42x70, 25мкм").click()
+    first_product.get_by_role("button", name="Увеличить").click()
+    page_authed.wait_for_selector("body[style*='overflow: hidden']")
+    page_authed.wait_for_selector("body[style*='overflow: auto']")
+
+    # Проверяем, что количество товара у первого товара увеличилось
+    cart_items = page_authed.locator("div[class*='product_card']").all()
+    for item_locator in cart_items:
+        if item_locator.get_by_text("Пакет-майка ПНД \"Ценалом\" 42x70, 25мкм").is_visible():
+            count = item_locator.get_by_label("Значение счетчика").input_value()
+            assert count == "2", "Количество товара не увеличилось"
+            break
+    
+    
+
+
+
+
+
+
+    
+
+    page_authed.wait_for_timeout(10000)
