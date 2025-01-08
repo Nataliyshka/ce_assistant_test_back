@@ -9,6 +9,7 @@ def test_cart(page_authed: Page):
     customer_phone = settings.CUSTOMER_GOLD
     page_authed.get_by_label("Телефон покупателя").fill("7" + customer_phone)
     page_authed.locator("button[class*='arrowBtn']").click()
+    page_authed.wait_for_selector("body[style*='overflow: auto']")
 
     customer_card = page_authed.locator("div[class*='customer_card']")
     expect(customer_card).to_be_visible()
@@ -58,13 +59,42 @@ def test_cart(page_authed: Page):
 
     # Проверяем, что количество товара у первого товара увеличилось
     cart_items = page_authed.locator("div[class*='product_card']").all()
+     
     for item_locator in cart_items:
         if item_locator.get_by_text("Пакет-майка ПНД \"Ценалом\" 42x70, 25мкм").is_visible():
             count = item_locator.get_by_label("Значение счетчика").input_value()
             assert count == "2", "Количество товара не увеличилось"
             break
-    
-    
+
+    # Удаляем товар из корзины
+    first_product = page_authed.locator("div[class*='product_card']").first
+    expect(first_product.get_by_text("Пакет-майка ПНД \"Ценалом\" 42x70, 25мкм")).to_be_visible()
+    first_product.locator("button[class*='delete']").click()
+    page_authed.wait_for_selector("body[style*='overflow: hidden']")
+    page_authed.wait_for_selector("body[style*='overflow: auto']")
+
+    # Проверяем, что количество товаров в корзине уменьшилось
+    cart_items = page_authed.locator("div[class*='product_card']").all()
+
+    for item_locator in cart_items:
+        if item_locator.get_by_text("Блендер погружной BRAYER BR1243 (800 Вт, 2 скорости, стакан 0,7 л, плавн. рег, венчик, белый").is_visible():
+            count = item_locator.get_by_label("Значение счетчика").input_value()
+            assert count == "1", "Количество товара не уменьшилось"
+            break
+
+    # Применяем бонусы
+    customer_card = page_authed.locator("div[class*='customer_card']")
+    page_authed.get_by_role("button", name="Списать баллы").click()
+    selector_modal = "div[class*='modal_bottom']"
+    page_authed.wait_for_selector(selector_modal)
+    modal = page_authed.locator(selector_modal)
+    modal.locator("button[class*='button']").click()
+    page_authed.wait_for_selector("body[style*='overflow: auto']")
+
+
+
+
+
 
 
 
