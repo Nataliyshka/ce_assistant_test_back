@@ -1,4 +1,4 @@
-from playwright.sync_api import expect, Page
+from playwright.sync_api import expect, Page, Locator
 from config import settings
 
 
@@ -40,8 +40,8 @@ def test_cart(page_authed: Page):
     # Добавляем ещё один товар
     page_authed.wait_for_selector("body[style*='overflow: auto']")
     page_authed.get_by_role("button", name="Поиск").click()
-    page_authed.get_by_placeholder("Поиск").fill("2008167281322")
-    page_authed.get_by_text("Штрихкод: 2008167281322").click()
+    page_authed.get_by_placeholder("Поиск").fill("2000999699443")
+    page_authed.get_by_text("Штрихкод: 2000999699443").click()
     page_authed.get_by_role("button", name="Выбрать").click()
     page_authed.wait_for_selector("body[style*='overflow: hidden']")
     page_authed.wait_for_selector("body[style*='overflow: auto']")
@@ -51,36 +51,27 @@ def test_cart(page_authed: Page):
 
     # Изменяем количество товара у первого товара
     page_authed.wait_for_selector("body[style*='overflow: auto']")
-    first_product = page_authed.locator("div[class*='product_card']").first
-    first_product.get_by_text("Пакет-майка ПНД \"Ценалом\" 42x70, 25мкм").click()
-    first_product.get_by_role("button", name="Увеличить").click()
+    item_locator = find_item_locator(page_authed, "Пакет-майка ПНД \"Ценалом\" 28x50, 16мкм")
+    item_locator.get_by_role("button", name="Увеличить").click()
     page_authed.wait_for_selector("body[style*='overflow: hidden']")
     page_authed.wait_for_selector("body[style*='overflow: auto']")
 
     # Проверяем, что количество товара у первого товара увеличилось
-    cart_items = page_authed.locator("div[class*='product_card']").all()
-     
-    for item_locator in cart_items:
-        if item_locator.get_by_text("Пакет-майка ПНД \"Ценалом\" 42x70, 25мкм").is_visible():
-            count = item_locator.get_by_label("Значение счетчика").input_value()
-            assert count == "2", "Количество товара не увеличилось"
-            break
+    item_locator = find_item_locator(page_authed, "Пакет-майка ПНД \"Ценалом\" 28x50, 16мкм")
+    count = item_locator.get_by_label("Значение счетчика").input_value()
+    assert count == "2", "Количество товара не увеличилось"
 
     # Удаляем товар из корзины
-    first_product = page_authed.locator("div[class*='product_card']").first
-    expect(first_product.get_by_text("Пакет-майка ПНД \"Ценалом\" 42x70, 25мкм")).to_be_visible()
-    first_product.locator("button[class*='delete']").click()
+    item_locator = find_item_locator(page_authed, "Пакет-майка ПНД \"Ценалом\" 28x50, 16мкм")
+    item_locator.locator("button[class*='delete']").click()
     page_authed.wait_for_selector("body[style*='overflow: hidden']")
     page_authed.wait_for_selector("body[style*='overflow: auto']")
 
     # Проверяем, что количество товаров в корзине уменьшилось
-    cart_items = page_authed.locator("div[class*='product_card']").all()
+    item_locator = find_item_locator(page_authed, "Пакет-майка ПНД \"Ценалом\" 42x70, 25мкм")
+    count = item_locator.get_by_label("Значение счетчика").input_value()
+    assert count == "1", "Количество товара не уменьшилось"
 
-    for item_locator in cart_items:
-        if item_locator.get_by_text("Блендер погружной BRAYER BR1243 (800 Вт, 2 скорости, стакан 0,7 л, плавн. рег, венчик, белый").is_visible():
-            count = item_locator.get_by_label("Значение счетчика").input_value()
-            assert count == "1", "Количество товара не уменьшилось"
-            break
 
     # Применяем бонусы
     customer_card = page_authed.locator("div[class*='customer_card']")
@@ -89,18 +80,33 @@ def test_cart(page_authed: Page):
     page_authed.wait_for_selector(selector_modal)
     modal = page_authed.locator(selector_modal)
     modal.locator("button[class*='button']").click()
-    page_authed.wait_for_selector("body[style*='overflow: auto']")
-
-
-
-
-
-
-
-
-
-
-
+    wait_for_loader(page_authed)
     
+    # Отправка заказа на кассу
+    page_authed.locator("div[class*='modal_menu']").click()
+    page_authed.wait_for_selector("div[class*='content'][class*='open']", state="attached")
+    with page_authed.expect_response("**/api/cart/**/order") as response_info:
+        page_authed.get_by_role("button", name="Отправить на кассу").click()
+        response = response_info.value
+        print(response.json())
+        assert response.status == 200
+
 
     page_authed.wait_for_timeout(10000)
+
+
+def wait_for_loader(page: Page):
+    # Ждём появления лоадера
+    page.wait_for_selector("div[class*='loader'][class*='visible']", state="attached")
+    # Ждём исчезновения лоадера
+    page.wait_for_selector("div[class*='loader'][class*='visible']", state="detached")
+
+def find_item_locator(page: Page, item_name: str) -> Locator :
+    cart_items = page.locator("div[class*='product_card']").all()
+    for item_locator in cart_items:
+        if item_locator.get_by_text(item_name).is_visible():
+            return item_locator
+    
+    raise Exception(f"Товар {item_name} не найден")
+
+
