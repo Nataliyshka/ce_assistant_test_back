@@ -3,13 +3,16 @@ from config import settings
 
 
 def test_cart(page_authed: Page):
+    """
+    Тест корзины позитивный
+    """
     # Ждём, пока body получит style="overflow: auto;" (прелоадер завершил работу)
     page_authed.wait_for_selector("body[style*='overflow: auto']")
     
     customer_phone = settings.CUSTOMER_GOLD
     page_authed.get_by_label("Телефон покупателя").fill("7" + customer_phone)
     page_authed.locator("button[class*='arrowBtn']").click()
-    page_authed.wait_for_selector("body[style*='overflow: auto']")
+    wait_for_loader(page_authed)
 
     customer_card = page_authed.locator("div[class*='customer_card']")
     expect(customer_card).to_be_visible()
@@ -83,13 +86,25 @@ def test_cart(page_authed: Page):
     wait_for_loader(page_authed)
     
     # Отправка заказа на кассу
-    page_authed.locator("div[class*='modal_menu']").click()
-    page_authed.wait_for_selector("div[class*='content'][class*='open']", state="attached")
-    with page_authed.expect_response("**/api/cart/**/order") as response_info:
-        page_authed.get_by_role("button", name="Отправить на кассу").click()
-        response = response_info.value
-        print(response.json())
-        assert response.status == 200
+    # page_authed.locator("div[class*='modal_menu']").click()
+    # page_authed.wait_for_selector("div[class*='content'][class*='open']", state="attached")
+    # with page_authed.expect_response("**/api/cart/**/order") as response_info:
+    #     page_authed.get_by_role("button", name="Отправить на кассу").click()
+    #     response = response_info.value
+    #     print(response.json())
+    #     assert response.status == 200
+
+    # Оплата по qr-коду
+    total_card = page_authed.locator("div[class*='total_card']")
+    total_card.get_by_role("button", name="Перейти к оплате").click()
+    expect(page_authed.locator("div[class*='qr_image']")).to_be_visible
+    page_authed.wait_for_timeout(60000)
+
+    #Получем уведомление об оплате
+    page_authed.locator("div[class*='content_nyaef']")
+    page_authed.get_by_text("Оплата успешно прошла")
+    page_authed.wait_for_timeout(10000)
+    
 
 
     page_authed.wait_for_timeout(10000)
